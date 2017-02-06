@@ -1,0 +1,137 @@
+--[[
+Lopa
+By: houseofkraft
+]]--
+
+-- Functions
+function setBG( color )
+  term.setBackgroundColor( color )
+  term.clear()
+  term.setCursorPos( 1,1 )
+end
+
+function loadFile( file )
+  f = fs.open( file, "r" )
+  local contents = f.readAll()
+  f.close()
+  return contents
+end
+
+function safeRun( program )
+  local ok, err = pcall(function()
+     shell.run( program )
+  end)
+  if err then
+    return Lopa.System:BSOD( err )
+  end
+end
+
+-- Images
+boot = paintutils.loadImage( "/Lopa/System/Images/boot" )
+
+-- Init
+setBG(colors.red)
+paintutils.drawImage( boot, 1, 1 )
+
+-- Load the APIs
+for k, v in pairs( fs.list( "/Lopa/System/APIs" ) ) do
+  os.loadAPI( v )
+end
+
+-- Provide an API
+Lopa = {
+  Fun = {
+    ASCII = {
+      Cat = {
+        "/\\___/\\",
+        "(  o o  )",
+        "/   *   \\",
+        "\__\_/__/ meow!",
+        "  /   \\",
+         "/ ___ \\",
+         "\\/___\\/"
+      }
+    },
+    MamaJokes = {
+      "Yo Mama so fat that when she pressed the up button on the elevator, it went down!"
+    }
+  }
+  System = {
+    BSOD = function( err )
+      term.setBackgroundColor( colors.blue )
+      term.clear()
+      term.setCursorPos( 1, 1 )
+      print( "Lopa has crashed!" )
+      print( "Error: " .. err)
+      print()
+      print( "Please report this to the GitHub repo!" )
+      print()
+      print("... here's a cat for now ...")
+      for k,v in pairs( Lopa.ASCII.Cat ) do
+        print( v )
+      end
+    end,
+    safeRun = function( program )
+      local ok, err = pcall(function()
+         shell.run( program )
+      end)
+      if err then
+        return Lopa.System:BSOD( err )
+      end
+    end,
+    drawImage = function( image, x, y )
+      img = paintutils.loadImage( image )
+      paintutils.drawImage( img, x, y )
+    end,
+    extensions = {
+      [1] = {
+        ".lua",
+        "/System/Programs/LuaIDE/program.lua"
+      }
+    }
+  },
+  Console = {
+    Center = function( text )
+      local x, y = term.getSize()
+      local x2, y2 = term.getCursorPos()
+      term.setCursorPos( math.ceil( (x / 2) - (text:len() / 2) ), y2 )
+      write(text)
+    end,
+    getCenterPos = function( text )
+      local x,y = term.getSize()
+      local x2,y2 = term.getCursorPos()
+      return math.ceil( (x / 2) - (text:len() / 2) ), y2
+    end,
+    -- Apply British spellings as well
+    Centre = function( text )
+      local x, y = term.getSize()
+      local x2, y2 = term.getCursorPos()
+      term.setCursorPos( math.ceil( (x / 2) - (text:len() / 2) ), y2 )
+      write(text)
+    end,
+    getCentrePos = function( text )
+      local x,y = term.getSize()
+      local x2,y2 = term.getCursorPos()
+      return math.ceil( (x / 2) - (text:len() / 2) ), y2
+    end,
+  },
+  -- Configuration Table
+  Config = textutils.unserialize( loadFile( "/System/main.config" ) ),
+  -- Verison indicator
+  version = loadFile( "/System/.version" )
+}
+
+os.sleep(1)
+setBG( colors.black )
+
+-- Init
+if fs.exists( "/System/.firstuse" ) then
+  local firstUse = loadFile( "/System/.firstuse" )
+  if firstUse == "true" then
+    safeRun( "/System/setup.lua" )
+  else
+    safeRun( "/System/gui.lua" )
+  end
+else
+  safeRun( "/System/setup.lua" )
+end
