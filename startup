@@ -55,7 +55,7 @@ Lopa = {
     MamaJokes = {
       "Yo Mama so fat that when she pressed the up button on the elevator, it went down!"
     }
-  }
+  },
   System = {
     BSOD = function( err )
       term.setBackgroundColor( colors.blue )
