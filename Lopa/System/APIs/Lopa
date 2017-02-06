@@ -1,0 +1,149 @@
+-- Lopa API
+-- By houseofkraft
+
+local function loadFile( file )
+  f = fs.open( file, "r" )
+  local contents = f.readAll()
+  f.close()
+  return contents
+end
+
+function System()
+  return {
+    BSOD = function( err )
+      term.setBackgroundColor( colors.blue )
+      term.clear()
+      term.setCursorPos( 1, 1 )
+      print( "Lopa has crashed!" )
+      print( "Error: " .. err)
+      print()
+      print( "Please report this to the GitHub repo!" )
+      print()
+      print("... here's a cat for now ...")
+      for k,v in pairs( Lopa.ASCII.Cat ) do
+        print( v )
+      end
+    end,
+    safeRun = function( program )
+      local ok, err = pcall(function()
+         shell.run( program )
+      end)
+      if err then
+        return Lopa.System:BSOD( err )
+      end
+    end,
+    drawImage = function( image, x, y )
+      -- Replace %LOPA% with the system directory
+      image = image:gsub( "%LOPA%", "/Lopa/System" )
+      img = paintutils.loadImage( image )
+      paintutils.drawImage( img, x, y )
+    end
+  }
+end
+
+function Extensions()
+  return {
+    [1] = {
+      ".lua",
+      "/System/Programs/LuaIDE/program.lua"
+    }
+  }
+end
+
+function Console()
+  return {
+    Center = function( text )
+      local x, y = term.getSize()
+      local x2, y2 = term.getCursorPos()
+      term.setCursorPos( math.ceil( (x / 2) - (text:len() / 2) ), y2 )
+      write(text)
+    end,
+    getCenterPos = function( text )
+      local x,y = term.getSize()
+      local x2,y2 = term.getCursorPos()
+      return math.ceil( (x / 2) - (text:len() / 2) ), y2
+    end,
+    -- Apply British spellings as well
+    Centre = function( text )
+      local x, y = term.getSize()
+      local x2, y2 = term.getCursorPos()
+      term.setCursorPos( math.ceil( (x / 2) - (text:len() / 2) ), y2 )
+      write(text)
+    end,
+    getCentrePos = function( text )
+      local x,y = term.getSize()
+      local x2,y2 = term.getCursorPos()
+      return math.ceil( (x / 2) - (text:len() / 2) ), y2
+    end
+  }
+end
+
+function Fun()
+  return {
+    ASCII = {
+      Cat = {
+        "/\\___/\\",
+        "(  o o  )",
+        "/   *   \\",
+        "\__\_/__/ meow!",
+        "  /   \\",
+         "/ ___ \\",
+         "\\/___\\/"
+      }
+    },
+    MamaJokes = {
+      "Yo Mama so fat that when she pressed the up button on the elevator, it went down!"
+    }
+  }
+end
+
+function Config()
+  return textutils.unserialize( loadFile( "/System/main.config" ) )
+end
+
+function Version()
+  return loadFile( "/System/.version" )
+end
+
+-- File fixer
+local fixable = {
+  "boot1",
+  "boot2",
+  "boot3",
+  "boot4",
+  "boot5",
+  "boot6",
+  "boot7",
+  "boot8"
+}
+
+function FixImage( file, branch )
+  local found = false
+  for index, fix in pairs( fixable ) do
+    if file == fix then
+      found = true
+    end
+  end
+  if found ~= true then
+    local errorMessage = file .. " is not fixable"
+    return false, errorMessage
+  end
+  if branch == nil then
+    branch = "master"
+  end
+  local req = http.get( "https://raw.githubusercontent.com/CoolMan119/Images/" .. file)
+  if req ~= nil then
+    local contents = req.readAll()
+  else
+    return false, "No data received"
+  end
+  req.close()
+  if contents then
+    -- Write the file
+    local name = "/Lopa/System/Images/" .. file
+    local file = fs.open( name, "w" )
+    file.write( contents )
+    file.close()
+    return true
+  end
+end
